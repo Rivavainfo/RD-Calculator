@@ -17,9 +17,9 @@
         :root {
             --bg: #071026;
             --panel: #0D142A;
-            --muted: #9AA4B2;
-            --accent: #7DE3D8;
-            --accent-secondary: #6fb4ff;
+            --muted: #A0B2C7;
+            --accent: #5ED9C9;
+            --accent-secondary: #4A90E2;
         }
         
         * { box-sizing: border-box; }
@@ -28,7 +28,7 @@
             margin: 0;
             padding: 0;
             background: linear-gradient(180deg, var(--bg), #071022 140%);
-            color: #E6EEF6;
+            color: #F0F4F8;
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -79,14 +79,14 @@
         }
         .form-label {
             font-weight: 600;
-            color: #ffffff;
+            color: #F0F4F8;
             font-size: 0.95rem;
             margin-bottom: 0.5rem;
         }
         .form-control {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #E6EEF6;
+            color: #F0F4F8;
             transition: all 0.3s ease;
             font-weight: 500;
             padding: 1rem;
@@ -95,8 +95,8 @@
         .form-control:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(125, 227, 216, 0.2);
-            background: rgba(125, 227, 216, 0.05);
+            box-shadow: 0 0 0 3px rgba(94, 217, 201, 0.2);
+            background: rgba(94, 217, 201, 0.05);
         }
         .btn-primary {
             background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
@@ -108,11 +108,11 @@
         }
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(125, 227, 216, 0.4);
+            box-shadow: 0 15px 35px rgba(94, 217, 201, 0.4);
         }
         .result-box {
-            background: rgba(125, 227, 216, 0.08);
-            border: 1px solid rgba(125, 227, 216, 0.2);
+            background: rgba(94, 217, 201, 0.08);
+            border: 1px solid rgba(94, 217, 201, 0.2);
             border-radius: 1rem;
             padding: 1.5rem;
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -125,11 +125,25 @@
             opacity: 1;
         }
         .result-card {
-            background: rgba(0,0,0,0.1);
+            background: var(--panel);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 0.75rem;
             padding: 1rem;
             text-align: center;
+        }
+        /* New styles for responsive text in result cards */
+        .result-card-value {
+            font-weight: 700;
+            font-size: 2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.25rem;
+        }
+        @media (min-width: 768px) {
+            .result-card-value {
+                font-size: 2.25rem;
+            }
         }
 
         /* Mobile specific styles */
@@ -154,7 +168,7 @@
             <form id="rdForm" class="grid gap-6 text-left">
                 <div class="fade-in-up stagger-1">
                     <label for="monthlyAmount" class="form-label block">Monthly Deposit (₹)</label>
-                    <input type="number" id="monthlyAmount" class="w-full form-control" placeholder="e.g., 5000" value="5000" required>
+                    <input type="number" id="monthlyAmount" class="w-full form-control" placeholder="e.g., 5000" required>
                 </div>
                 
                 <div class="fade-in-up stagger-2">
@@ -164,7 +178,7 @@
                 
                 <div class="fade-in-up stagger-3">
                     <label for="tenureMonths" class="form-label block">Tenure (Months)</label>
-                    <input type="number" id="tenureMonths" class="w-full form-control" placeholder="e.g., 60" value="60" required>
+                    <input type="number" id="tenureMonths" class="w-full form-control" placeholder="e.g., 60" required>
                 </div>
                 
                 <button type="submit" class="mt-8 px-8 py-4 rounded-full btn-primary font-semibold text-lg hover:shadow-2xl interactive-element fade-in-up stagger-4">
@@ -187,21 +201,32 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <div class="result-card">
                     <div class="text-xs text-[color:var(--muted)]">Total Amount Invested</div>
-                    <div class="font-extrabold text-2xl mt-1 text-white" id="investedAmount">₹0</div>
+                    <div class="font-extrabold text-2xl mt-1 text-white result-card-value" id="investedAmount">₹0</div>
                 </div>
                 <div class="result-card">
                     <div class="text-xs text-[color:var(--muted)]">Total Interest Earned</div>
-                    <div class="font-extrabold text-2xl mt-1 text-blue-300" id="interestEarned">₹0</div>
+                    <div class="font-extrabold text-2xl mt-1 text-blue-300 result-card-value" id="interestEarned">₹0</div>
                 </div>
                 <div class="result-card md:col-span-2">
                     <div class="text-xs text-[color:var(--muted)]">Total Maturity Amount</div>
-                    <div class="font-extrabold text-3xl md:text-4xl mt-1 text-teal-300" id="maturityAmount">₹0</div>
+                    <div class="font-extrabold text-3xl md:text-4xl mt-1 text-teal-300 result-card-value" id="maturityAmount">₹0</div>
                 </div>
             </div>
 
             <div class="relative w-full h-80">
                 <canvas id="rdChart"></canvas>
             </div>
+            
+            <div id="insight-container" class="mt-10 pt-6 border-t border-white/10" style="display:none;">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                    <i class="fas fa-hand-holding-heart text-pink-400"></i> Saving Habits & Tips
+                </h3>
+                <div id="insight-content" class="text-[color:var(--muted)] leading-relaxed text-sm"></div>
+            </div>
+
+            <button id="getInsightBtn" class="mt-8 px-8 py-4 rounded-full btn-primary font-semibold text-lg hover:shadow-2xl interactive-element fade-in-up stagger-6">
+                <i class="fas fa-sparkles"></i> Get Saving Tips
+            </button>
         </div>
     </div>
     
@@ -210,6 +235,9 @@
         const rateInput = document.getElementById('rate');
         const tenureMonthsInput = document.getElementById('tenureMonths');
         const rdForm = document.getElementById('rdForm');
+        const getInsightBtn = document.getElementById('getInsightBtn');
+        const insightContainer = document.getElementById('insight-container');
+        const insightContent = document.getElementById('insight-content');
 
         const resultsPanel = document.getElementById('resultsPanel');
         const maturityAmountSpan = document.getElementById('maturityAmount');
@@ -221,6 +249,7 @@
 
         // Function to format numbers with commas
         const formatNumber = (num) => {
+            if (isNaN(num)) return '₹0.00';
             return parseFloat(num).toLocaleString('en-IN', {
                 maximumFractionDigits: 2,
                 style: 'currency',
@@ -235,8 +264,8 @@
             const tenureMonths = parseFloat(tenureMonthsInput.value);
             
             if (isNaN(monthlyAmount) || isNaN(rate) || isNaN(tenureMonths) || monthlyAmount <= 0 || rate <= 0 || tenureMonths <= 0) {
-                errorMessageDiv.classList.remove('hidden');
                 resultsPanel.style.display = 'none';
+                errorMessageDiv.classList.remove('hidden');
                 return;
             }
             
@@ -268,12 +297,12 @@
                     label: 'RD Breakdown',
                     data: [investedAmount, interestEarned],
                     backgroundColor: [
-                        'rgba(125, 227, 216, 0.8)', 
-                        'rgba(111, 180, 255, 0.8)'
+                        'rgba(94, 217, 201, 0.8)', 
+                        'rgba(74, 144, 226, 0.8)'
                     ],
                     borderColor: [
-                        '#7DE3D8',
-                        '#6fb4ff'
+                        '#5ED9C9',
+                        '#4A90E2'
                     ],
                     hoverOffset: 15,
                 }]
@@ -286,14 +315,14 @@
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: 'white',
+                            color: '#F0F4F8',
                             font: { family: 'Inter', size: 14 }
                         }
                     },
                     tooltip: {
                         backgroundColor: '#0D142A',
-                        titleColor: '#7DE3D8',
-                        bodyColor: 'white',
+                        titleColor: '#5ED9C9',
+                        bodyColor: '#F0F4F8',
                         titleFont: { family: 'Inter', size: 14, weight: 'bold' },
                         bodyFont: { family: 'Inter', size: 12 },
                         borderColor: 'rgba(255,255,255,0.1)',
@@ -315,19 +344,55 @@
             rdChart = new Chart(ctx, { type: 'doughnut', data: chartData, options: chartOptions });
         };
         
-        // Event listeners for real-time calculation
-        rdForm.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', calculateRD);
-        });
-        
-        // Initial calculation on page load with default values
-        document.addEventListener('DOMContentLoaded', calculateRD);
-        
-        // Fallback for the button click
         rdForm.addEventListener('submit', function(e) {
             e.preventDefault();
             calculateRD();
         });
+
+        getInsightBtn.addEventListener('click', async () => {
+            const monthlyAmount = parseFloat(monthlyAmountInput.value);
+            const tenureMonths = parseFloat(tenureMonthsInput.value);
+
+            if (isNaN(monthlyAmount) || isNaN(tenureMonths) || monthlyAmount <= 0 || tenureMonths <= 0) {
+                return;
+            }
+
+            const buttonText = getInsightBtn.innerHTML;
+            getInsightBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            getInsightBtn.disabled = true;
+
+            const prompt = `Generate a friendly and professional paragraph, in less than 150 words, with 3-4 actionable tips to help someone improve their savings habits to achieve their financial goals. Relate the advice to a recurring deposit of ₹${monthlyAmount.toLocaleString('en-IN')} over ${tenureMonths} months. Do not use markdown formatting like bolding or lists. Just provide a clear, single paragraph of text.`;
+
+            let insight = 'Sorry, I couldn\'t generate saving tips at this time. Please try again later.';
+            try {
+                const apiKey = ""
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                };
+                
+                let response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    insight = result.candidates[0].content.parts[0].text;
+                }
+            } catch (error) {
+                console.error('Error fetching data from Gemini API:', error);
+            }
+
+            insightContent.textContent = insight;
+            insightContainer.style.display = 'block';
+            getInsightBtn.innerHTML = buttonText;
+            getInsightBtn.disabled = false;
+        });
     </script>
 </body>
 </html>
+
