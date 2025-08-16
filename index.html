@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>RD Calculator — Rivava</title>
+    <!-- Favicon -->
+    <link rel="icon" href="https://placehold.co/32x32/7DE3D8/071026?text=R" type="image/png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Chart.js for the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* Reusing main website's theme variables for consistency */
+        :root {
+            --bg: #071026;
+            --panel: #0D142A;
+            --muted: #9AA4B2;
+            --accent: #7DE3D8;
+            --accent-secondary: #6fb4ff;
+        }
+        
+        * { box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(180deg, var(--bg), #071022 140%);
+            color: #E6EEF6;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            cursor: default;
+        }
+        
+        /* Load Inter font to ensure consistent bolding */
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZs.woff2) format('woff2');
+        }
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 700;
+            src: url(https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZs.woff2) format('woff2');
+        }
+        
+        /* General animations */
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            will-change: transform, opacity;
+        }
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+
+        /* Custom styles for calculator elements */
+        .glass-panel {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+            border: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #E6EEF6;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            padding: 1rem;
+            border-radius: 0.75rem;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(125, 227, 216, 0.2);
+            background: rgba(125, 227, 216, 0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            color: #032022;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(125, 227, 216, 0.4);
+        }
+        .result-box {
+            background: rgba(125, 227, 216, 0.08);
+            border: 1px solid rgba(125, 227, 216, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: scale(0.95);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .result-box.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .result-card {
+            background: rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* Mobile specific styles */
+        @media (max-width: 1023px) {
+            .container {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="container px-4 py-12 max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Calculator Inputs Panel -->
+        <div class="glass-panel p-8 md:p-12 fade-in-up">
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-400">
+                RD Calculator
+            </h1>
+            <p class="text-lg text-[color:var(--muted)] mb-8">Calculate your savings growth.</p>
+            
+            <form id="rdForm" class="grid gap-6 text-left">
+                <div class="fade-in-up stagger-1">
+                    <label for="monthlyAmount" class="form-label block">Monthly Deposit (₹)</label>
+                    <input type="number" id="monthlyAmount" class="w-full form-control" placeholder="e.g., 5000" value="5000" required>
+                </div>
+                
+                <div class="fade-in-up stagger-2">
+                    <label for="rate" class="form-label block">Annual Interest Rate (%)</label>
+                    <input type="number" step="0.01" id="rate" class="w-full form-control" placeholder="e.g., 7.5" value="7.5" required>
+                </div>
+                
+                <div class="fade-in-up stagger-3">
+                    <label for="tenureMonths" class="form-label block">Tenure (Months)</label>
+                    <input type="number" id="tenureMonths" class="w-full form-control" placeholder="e.g., 60" value="60" required>
+                </div>
+                
+                <button type="submit" class="mt-8 px-8 py-4 rounded-full btn-primary font-semibold text-lg hover:shadow-2xl interactive-element fade-in-up stagger-4">
+                    Calculate Now
+                </button>
+            </form>
+            
+            <div id="error-message" class="mt-6 text-red-400 hidden">Please fill in all the fields with valid numbers.</div>
+        </div>
+        
+        <!-- Results and Graph Panel -->
+        <div id="resultsPanel" class="glass-panel p-8 md:p-12 fade-in-up stagger-5" style="display:none;">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl md:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-400">
+                    Your Savings Outlook
+                </h2>
+                <p class="text-[color:var(--muted)] text-sm">Visualizing your RD growth over time.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div class="result-card">
+                    <div class="text-xs text-[color:var(--muted)]">Total Amount Invested</div>
+                    <div class="font-extrabold text-2xl mt-1 text-white" id="investedAmount">₹0</div>
+                </div>
+                <div class="result-card">
+                    <div class="text-xs text-[color:var(--muted)]">Total Interest Earned</div>
+                    <div class="font-extrabold text-2xl mt-1 text-blue-300" id="interestEarned">₹0</div>
+                </div>
+                <div class="result-card md:col-span-2">
+                    <div class="text-xs text-[color:var(--muted)]">Total Maturity Amount</div>
+                    <div class="font-extrabold text-3xl md:text-4xl mt-1 text-teal-300" id="maturityAmount">₹0</div>
+                </div>
+            </div>
+
+            <div class="relative w-full h-80">
+                <canvas id="rdChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const monthlyAmountInput = document.getElementById('monthlyAmount');
+        const rateInput = document.getElementById('rate');
+        const tenureMonthsInput = document.getElementById('tenureMonths');
+        const rdForm = document.getElementById('rdForm');
+
+        const resultsPanel = document.getElementById('resultsPanel');
+        const maturityAmountSpan = document.getElementById('maturityAmount');
+        const investedAmountSpan = document.getElementById('investedAmount');
+        const interestEarnedSpan = document.getElementById('interestEarned');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        let rdChart = null;
+
+        // Function to format numbers with commas
+        const formatNumber = (num) => {
+            return parseFloat(num).toLocaleString('en-IN', {
+                maximumFractionDigits: 2,
+                style: 'currency',
+                currency: 'INR'
+            });
+        };
+        
+        // Function to perform the calculation
+        const calculateRD = () => {
+            const monthlyAmount = parseFloat(monthlyAmountInput.value);
+            const rate = parseFloat(rateInput.value);
+            const tenureMonths = parseFloat(tenureMonthsInput.value);
+            
+            if (isNaN(monthlyAmount) || isNaN(rate) || isNaN(tenureMonths) || monthlyAmount <= 0 || rate <= 0 || tenureMonths <= 0) {
+                errorMessageDiv.classList.remove('hidden');
+                resultsPanel.style.display = 'none';
+                return;
+            }
+            
+            errorMessageDiv.classList.add('hidden');
+            
+            const monthlyRate = (rate / 12) / 100;
+            let maturityAmount = 0;
+            const investedAmount = monthlyAmount * tenureMonths;
+            
+            // Corrected RD compounding calculation loop
+            for (let i = 0; i < tenureMonths; i++) {
+                maturityAmount += monthlyAmount;
+                maturityAmount = maturityAmount * (1 + monthlyRate);
+            }
+
+            const interestEarned = maturityAmount - investedAmount;
+            
+            investedAmountSpan.textContent = formatNumber(investedAmount);
+            interestEarnedSpan.textContent = formatNumber(interestEarned);
+            maturityAmountSpan.textContent = formatNumber(maturityAmount);
+            
+            resultsPanel.style.display = 'block';
+
+            const ctx = document.getElementById('rdChart').getContext('2d');
+            
+            const chartData = {
+                labels: ['Total Principal', 'Total Interest Earned'],
+                datasets: [{
+                    label: 'RD Breakdown',
+                    data: [investedAmount, interestEarned],
+                    backgroundColor: [
+                        'rgba(125, 227, 216, 0.8)', 
+                        'rgba(111, 180, 255, 0.8)'
+                    ],
+                    borderColor: [
+                        '#7DE3D8',
+                        '#6fb4ff'
+                    ],
+                    hoverOffset: 15,
+                }]
+            };
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'white',
+                            font: { family: 'Inter', size: 14 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#0D142A',
+                        titleColor: '#7DE3D8',
+                        bodyColor: 'white',
+                        titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let total = context.chart.data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+                                let percentage = ((context.parsed / total) * 100).toFixed(2) + '%';
+                                return `${context.label}: ${formatNumber(context.parsed)} (${percentage})`;
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (rdChart) {
+                rdChart.destroy();
+            }
+            rdChart = new Chart(ctx, { type: 'doughnut', data: chartData, options: chartOptions });
+        };
+        
+        // Event listeners for real-time calculation
+        rdForm.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculateRD);
+        });
+        
+        // Initial calculation on page load with default values
+        document.addEventListener('DOMContentLoaded', calculateRD);
+        
+        // Fallback for the button click
+        rdForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateRD();
+        });
+    </script>
+</body>
+</html>
